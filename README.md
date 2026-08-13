@@ -70,15 +70,25 @@ reindexes at most once every 10 minutes.
 ### Codex
 
 Codex reads skills from `.agents/skills` (walking up from the working directory to the repo root)
-and from `$HOME/.agents/skills` at user scope. **One junction at user scope covers every repo:**
+and from `$HOME/.agents/skills` at user scope. **Wiring user scope once covers every repo:**
 
-```
-mklink /J "%USERPROFILE%\.agents\skills\kolby-workflow" "<path-to-clone>\plugins\kolby-workflow\skills"
+```bash
+pwsh -File scripts/sync-codex-skills.ps1
 ```
 
-Run that from `cmd.exe` — `mklink` is a cmd builtin, not a PowerShell cmdlet. Directory junctions
-need no administrator rights and are unaffected by `core.symlinks=false`, which is what makes this
-safe on Windows where committed symlinks are not.
+Codex treats each *subdirectory* of `~/.agents/skills` as one skill containing `SKILL.md`, while the
+plugin stores them at `skills/<skill>/SKILL.md`. The two layouts differ by one level, so a single
+junction of the whole `skills/` folder puts `SKILL.md` one level too deep and Codex finds **no
+skills at all** — silently. The script creates one junction per skill instead, and re-running it
+picks up added or removed skills.
+
+Directory junctions rather than git symlinks, deliberately: git stores a symlink correctly as mode
+`120000`, but a Windows checkout with `core.symlinks=false` materializes it as a small text file
+containing the target path — valid in the index, inert in the working tree. Junctions are created
+locally, need no administrator rights, and ignore that setting.
+
+Pass `-WhatIf` to see what it would do. It only ever removes reparse points that point into this
+plugin, so a real directory or another tool's skill in `~/.agents/skills` is left alone.
 
 ---
 
