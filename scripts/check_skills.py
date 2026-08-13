@@ -63,7 +63,12 @@ def parse_frontmatter(path: Path) -> dict[str, str] | None:
 
 
 def check_skill(skill_md: Path) -> list[str]:
-    rel = skill_md.relative_to(REPO_ROOT).as_posix()
+    try:
+        rel = skill_md.relative_to(REPO_ROOT).as_posix()
+    except ValueError:
+        # Off-tree (a test fixture, or an unusual checkout layout) -- report the
+        # full path rather than crashing on the cosmetic part of the message.
+        rel = str(skill_md)
     keys = parse_frontmatter(skill_md)
     if keys is None:
         return [f"{rel}: no YAML frontmatter block"]

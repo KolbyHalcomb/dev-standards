@@ -96,15 +96,42 @@ safe on Windows where committed symlinks are not.
 
 ## Reusable CI workflows
 
-Consumer repos call these instead of copying scripts. Pin by SHA:
+Consumer repos call `docs-ci.yml` instead of copying scripts:
 
 ```yaml
 jobs:
   docs:
     uses: KolbyHalcomb/dev-standards/.github/workflows/docs-ci.yml@<sha>
+    with:
+      standards-ref: <same sha>
+      tracked-docs: |
+        devices.md
+        network.md
+      changelog-files: CHANGELOG.md
 ```
 
+`uses:` pins the workflow; `standards-ref` pins the scripts it runs. Pass the same SHA to both, or a
+workflow and its scripts can come from different commits.
+
 This repo is public, so no Actions access configuration is needed on consumers.
+
+| Job | Behavior |
+| --- | --- |
+| `lint` | markdownlint-cli2 over `markdownlint-globs`. |
+| `links` | Relative links and `#anchor` targets resolve. Fails the build. |
+| `tbd` | Inventories `TBD` placeholders. Informational — `continue-on-error`. |
+| `changelog` | PR-only. Fails if a `tracked-docs` file changed without a `changelog-files` entry. Skipped entirely when `tracked-docs` is empty. |
+
+Each job is individually disableable (`run-lint`, `run-links`, `run-tbd`) so a code repo can take
+only what applies.
+
+### Every check refuses to pass vacuously
+
+A doc checker that discovers zero files reports success while inspecting nothing — the failure mode
+that produced `docfiles.py`. Discovery skips directories by path **relative to the docs root**, so a
+checkout living beneath a skipped name (a git worktree under `.claude/`) is unaffected, and an empty
+walk exits non-zero rather than green. The changelog gate applies the same rule to its own config:
+an empty `tracked-docs` fails loudly instead of passing every PR.
 
 ---
 

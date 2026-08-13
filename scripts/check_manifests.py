@@ -27,14 +27,22 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 PLUGINS_DIR = REPO_ROOT / "plugins"
 
 
+def rel(path: Path) -> str:
+    """Path relative to the repo root, falling back to the full path off-tree."""
+    try:
+        return path.relative_to(REPO_ROOT).as_posix()
+    except ValueError:
+        return str(path)
+
+
 def load(path: Path) -> dict:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
     except FileNotFoundError:
-        print(f"ERROR: missing manifest: {path.relative_to(REPO_ROOT)}")
+        print(f"ERROR: missing manifest: {rel(path)}")
         raise SystemExit(1)
     except json.JSONDecodeError as exc:
-        print(f"ERROR: {path.relative_to(REPO_ROOT)} is not valid JSON: {exc}")
+        print(f"ERROR: {rel(path)} is not valid JSON: {exc}")
         raise SystemExit(1)
 
 
@@ -70,7 +78,7 @@ def check_plugin(plugin_dir: Path) -> list[str]:
 
 def main() -> int:
     if not PLUGINS_DIR.is_dir():
-        print(f"ERROR: no plugins directory at {PLUGINS_DIR.relative_to(REPO_ROOT)}")
+        print(f"ERROR: no plugins directory at {rel(PLUGINS_DIR)}")
         return 1
 
     plugin_dirs = sorted(p for p in PLUGINS_DIR.iterdir() if p.is_dir())

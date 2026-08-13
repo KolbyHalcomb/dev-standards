@@ -1,0 +1,147 @@
+name: Docs CI
+
+# Reusable docs checks. Call from a consumer repo:
+#
+#   jobs:
+#     docs:
+#       uses: KolbyHalcomb/dev-standards/.github/workflows/docs-ci.yml@<sha>
+#       with:
+#         standards-ref: <same sha>
+#         tracked-docs: |
+#           devices.md
+#           network.md
+#         changelog-files: CHANGELOG.md
+#
+# `uses:` pins the workflow; `standards-ref` pins the scripts it runs. Pass the
+# same SHA to both so a workflow and its scripts never come from different
+# commits.
+
+on:
+  workflow_call:
+    inputs:
+      standards-ref:
+        description: "Ref of KolbyHalcomb/dev-standards to take scripts from."
+        type: string
+        default: main
+      tracked-docs:
+        description: "Docs whose change requires a CHANGELOG entry. Empty disables the changelog gate."
+        type: string
+        default: ""
+      changelog-files:
+        description: "Any one of these satisfies the changelog gate."
+        type: string
+        default: "CHANGELOG.md"
+      tbd-skip-files:
+        description: "Filenames the TBD inventory ignores. Empty uses the script default."
+        type: string
+        default: ""
+      extra-skip-dirs:
+        description: "Additional directory names to skip during discovery."
+        type: string
+        default: ""
+      markdownlint-globs:
+        description: "Globs for markdownlint-cli2."
+        type: string
+        default: "**/*.md"
+      run-lint:
+        description: "Run markdown lint."
+        type: boolean
+        default: true
+      run-links:
+        description: "Run the internal link and anchor checker."
+        type: boolean
+        default: true
+      run-tbd:
+        description: "Run the TBD inventory (informational)."
+        type: boolean
+        default: true
+
+jobs:
+  lint:
+    name: Markdown lint
+    if: inputs.run-lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DavidAnson/markdownlint-cli2-action@v16
+        with:
+          globs: ${{ inputs.markdownlint-globs }}
+
+  links:
+    name: Internal links
+    if: inputs.run-links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: KolbyHalcomb/dev-standards
+          ref: ${{ inputs.standards-ref }}
+          path: .dev-standards
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Check links and anchors
+        env:
+          DOCS_ROOT: ${{ github.workspace }}
+          EXTRA_SKIP_DIRS: ${{ inputs.extra-skip-dirs }}
+        # .dev-standards is skipped by name so the standards checkout's own
+        # markdown is never mistaken for the caller's docs.
+        run: |
+          EXTRA_SKIP_DIRS=".dev-standards $EXTRA_SKIP_DIRS" \
+            python3 .dev-standards/scripts/check_links.py
+
+  tbd:
+    name: TBD inventory
+    if: inputs.run-tbd
+    runs-on: ubuntu-latest
+    # Informational: unresolved TBDs are a status report, not a failure. The
+    # script still exits non-zero on a broken walk, and continue-on-error keeps
+    # that from blocking while remaining visible in the run summary.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: KolbyHalcomb/dev-standards
+          ref: ${{ inputs.standards-ref }}
+          path: .dev-standards
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Inventory TBD placeholders
+        env:
+          DOCS_ROOT: ${{ github.workspace }}
+          TBD_SKIP_FILES: ${{ inputs.tbd-skip-files }}
+          EXTRA_SKIP_DIRS: ${{ inputs.extra-skip-dirs }}
+        run: |
+          EXTRA_SKIP_DIRS=".dev-standards $EXTRA_SKIP_DIRS" \
+            python3 .dev-standards/scripts/check_tbd.py
+
+  changelog:
+    name: CHANGELOG discipline
+    # Only meaningful on a PR, and only when the caller declares tracked docs.
+    if: github.event_name == 'pull_request' && inputs.tracked-docs != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Both sides of the diff must be present locally.
+          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          repository: KolbyHalcomb/dev-standards
+          ref: ${{ inputs.standards-ref }}
+          path: .dev-standards
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Require a CHANGELOG entry
+        env:
+          DOCS_ROOT: ${{ github.workspace }}
+          TRACKED_DOCS: ${{ inputs.tracked-docs }}
+          CHANGELOG_FILES: ${{ inputs.changelog-files }}
+        run: |
+          python3 .dev-standards/scripts/check_changelog.py \
+            "${{ github.event.pull_request.base.sha }}" \
+            "${{ github.event.pull_request.head.sha }}"
