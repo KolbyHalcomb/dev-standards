@@ -72,9 +72,11 @@ only reason the split holds.
 ## Do not bridge files with git symlinks
 
 The tempting shortcut is to symlink one entry file to the other, or to symlink a shared skills
-directory into each tool's expected location. On Windows with `core.symlinks=false`, git commits
-symlinks as **plain text files containing the target path**. They appear to work on the machine that
-created them and are inert everywhere else — a failure that looks like success.
+directory into each tool's expected location. Git stores the symlink correctly — mode `120000` — but
+on Windows with `core.symlinks=false` it **checks out as a small text file containing the target
+path**. The repo is not malformed; the working tree is. The agent opens what it thinks is a
+directory and finds one line of text, so the skill silently does not exist on the machine that
+actually runs it.
 
 Use a real mechanism instead: a directory junction (`mklink /J`, no admin required), a sync script,
 or plugin distribution.
