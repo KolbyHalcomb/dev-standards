@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  manifests:
+    name: Plugin manifests agree
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python3 scripts/check_manifests.py
+
+  json:
+    name: JSON is parseable
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse every tracked .json
+        run: |
+          set -euo pipefail
+          count=0
+          while IFS= read -r f; do
+            python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$f"
+            count=$((count + 1))
+          done < <(git ls-files '*.json')
+          # A run that discovered no files is a vacuous pass, not a green check.
+          if [ "$count" -eq 0 ]; then
+            echo "ERROR: discovered zero .json files -- this check inspected nothing."
+            exit 1
+          fi
+          echo "OK: parsed $count JSON file(s)."
+
+  skills:
+    name: Skills are portable
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python3 scripts/check_skills.py
+
+  lint:
+    name: Markdown lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DavidAnson/markdownlint-cli2-action@v16
+        with:
+          globs: "**/*.md"

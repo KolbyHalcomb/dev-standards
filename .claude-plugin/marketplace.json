@@ -1,0 +1,26 @@
+{
+  "name": "kolby",
+  "owner": {
+    "name": "Kolby Halcomb",
+    "url": "https://github.com/KolbyHalcomb"
+  },
+  "metadata": {
+    "description": "Cross-repo agent and CI conventions.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "kolby-workflow",
+      "source": "./plugins/kolby-workflow",
+      "description": "Documentation and change-management discipline: the change workflow, CHANGELOG format, shared-brain split, planning conventions, and safety-rule authoring.",
+      "version": "0.1.0",
+      "category": "productivity",
+      "keywords": [
+        "documentation",
+        "changelog",
+        "workflow",
+        "planning"
+      ]
+    }
+  ]
+}

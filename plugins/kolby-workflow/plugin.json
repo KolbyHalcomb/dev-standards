@@ -1,0 +1,6 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "kolby-workflow",
+  "version": "0.1.0",
+  "description": "Documentation and change-management discipline for Kolby's repos: the change workflow, CHANGELOG format, shared-brain split, planning conventions, and safety-rule authoring."
+}
