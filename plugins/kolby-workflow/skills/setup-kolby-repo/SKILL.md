@@ -54,6 +54,11 @@ Add (or extend) a workflow that calls the reusable workflows, pinned to the chos
 name: Standards
 on:
   pull_request:
+    # `edited` is load-bearing: the gate reads the PR title and body, and
+    # GitHub's default activity types omit it. Without it, adding `Closes #N`
+    # or an exempt prefix leaves the failing check standing until an unrelated
+    # commit is pushed.
+    types: [opened, synchronize, reopened, edited]
     branches: [main]
 jobs:
   workflow:
@@ -70,6 +75,10 @@ jobs:
 Docs repos add `tracked-docs` / `changelog-files` to the docs job; app repos usually skip the
 changelog gate. Confirm the exempt prefixes with the user — they are the repo's declared
 "no ticket needed" categories (`ticket-first`).
+
+**Check the repo's default branch before copying.** `branches:` must name it — a repo on `master`
+that gets the `main` snippet verbatim ends up with a workflow that never fires, and a gate that
+never fires looks identical to a gate that always passes.
 
 ## 4. Sync the triage labels
 

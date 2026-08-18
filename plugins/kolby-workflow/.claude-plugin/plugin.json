@@ -1,6 +1,6 @@
 {
   "name": "kolby-workflow",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Documentation, change-management, and multiagent workflow discipline for Kolby's repos: the change workflow, CHANGELOG format, shared-brain split, planning conventions, safety-rule authoring, ticket-first, review-before-advance, delegation, and repo setup.",
   "author": {
     "name": "Kolby Halcomb"
