@@ -1,0 +1,27 @@
+[
+  {
+    "name": "needs-triage",
+    "color": "d93f0b",
+    "description": "Arrived raw; nobody has categorised it yet."
+  },
+  {
+    "name": "needs-info",
+    "color": "fbca04",
+    "description": "Blocked on the reporter; cannot be verified without more detail."
+  },
+  {
+    "name": "ready-for-agent",
+    "color": "0e8a16",
+    "description": "Verified and scoped with a binary done-when; an agent can pick it up."
+  },
+  {
+    "name": "ready-for-human",
+    "color": "1d76db",
+    "description": "Needs human judgment or hands; not agent work."
+  },
+  {
+    "name": "wontfix",
+    "color": "cfd3d7",
+    "description": "Deliberately not doing this; the reason is recorded on the issue."
+  }
+]

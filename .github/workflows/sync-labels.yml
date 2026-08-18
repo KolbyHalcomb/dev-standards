@@ -1,0 +1,60 @@
+name: Sync labels
+
+# Reusable triage-label sync. Call from a consumer repo, typically on
+# workflow_dispatch (labels change rarely; a schedule is noise):
+#
+#   name: Sync labels
+#   on: workflow_dispatch
+#   permissions:
+#     issues: write
+#   jobs:
+#     labels:
+#       uses: KolbyHalcomb/dev-standards/.github/workflows/sync-labels.yml@<sha>
+#       with:
+#         standards-ref: <same sha>
+#
+# Creates missing triage labels and repairs drifted color/description. It
+# never deletes -- a repo's extra labels are its own business. The default
+# vocabulary is templates/labels.json in dev-standards; pass `labels-file` to
+# use a file from the calling repo instead.
+
+on:
+  workflow_call:
+    inputs:
+      standards-ref:
+        description: "Ref of KolbyHalcomb/dev-standards to take the script and default labels from."
+        type: string
+        default: main
+      labels-file:
+        description: "Path to a labels JSON in the calling repo. Empty uses the shared templates/labels.json."
+        type: string
+        default: ""
+      dry-run:
+        description: "Print the plan without applying it."
+        type: boolean
+        default: false
+
+jobs:
+  sync:
+    name: Converge triage labels
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: KolbyHalcomb/dev-standards
+          ref: ${{ inputs.standards-ref }}
+          path: .dev-standards
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Sync labels
+        env:
+          LABELS_FILE: ${{ inputs.labels-file != '' && inputs.labels-file || '.dev-standards/templates/labels.json' }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python3 .dev-standards/scripts/sync_labels.py \
+            ${{ inputs.dry-run && '--dry-run' || '' }}

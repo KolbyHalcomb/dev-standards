@@ -1,0 +1,80 @@
+name: Workflow CI
+
+# Reusable ticket-first gate. Call from a consumer repo on pull_request:
+#
+#   jobs:
+#     workflow:
+#       uses: KolbyHalcomb/dev-standards/.github/workflows/workflow-ci.yml@<sha>
+#       with:
+#         standards-ref: <same sha>
+#         exempt-title-prefixes: "chore: docs:"
+#
+# `uses:` pins the workflow; `standards-ref` pins the script it runs. Pass the
+# same SHA to both so a workflow and its script never come from different
+# commits.
+#
+# What it enforces (the plugin's `ticket-first` skill, mechanically):
+#   - the PR body carries a closing reference (`Closes #N`) to the issue it
+#     implements, unless the title carries a declared exempt prefix;
+#   - every issue the PR closes wears the readiness label, so nothing gets
+#     built before triage says it is agent-ready;
+#   - optionally, the head branch matches a naming pattern.
+#
+# This gate only bites once branch protection on the consumer repo requires it.
+
+on:
+  workflow_call:
+    inputs:
+      standards-ref:
+        description: "Ref of KolbyHalcomb/dev-standards to take the script from."
+        type: string
+        default: main
+      require-linked-issue:
+        description: "Demand a closing reference in the PR body."
+        type: boolean
+        default: true
+      required-label:
+        description: "Label every linked issue must carry. Empty disables the label check."
+        type: string
+        default: "ready-for-agent"
+      exempt-title-prefixes:
+        description: "Title prefixes exempt from the linked-issue rule (whitespace- or comma-separated)."
+        type: string
+        default: ""
+      branch-pattern:
+        description: "Full-match regex the head branch must satisfy. Empty disables."
+        type: string
+        default: ""
+
+jobs:
+  pr-gate:
+    name: Ticket-first gate
+    # Closing references and labels only exist for PRs; on any other event
+    # there is nothing to gate.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: KolbyHalcomb/dev-standards
+          ref: ${{ inputs.standards-ref }}
+          path: .dev-standards
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Require an agent-ready linked issue
+        # Title and body are attacker-controlled text; they enter the script
+        # only through the environment, never through shell interpolation.
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          REQUIRE_LINKED_ISSUE: ${{ inputs.require-linked-issue }}
+          REQUIRED_LABEL: ${{ inputs.required-label }}
+          EXEMPT_TITLE_PREFIXES: ${{ inputs.exempt-title-prefixes }}
+          BRANCH_PATTERN: ${{ inputs.branch-pattern }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 .dev-standards/scripts/check_pr_gate.py

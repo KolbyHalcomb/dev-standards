@@ -1,0 +1,33 @@
+name: Ticket
+description: An agent-ready unit of work — scoped, gated, edges declared. Filling every field is what earns the ready-for-agent label this form applies.
+labels: ["ready-for-agent"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: What to build
+      description: The change in plain English. Link the spec or decision it comes from if one exists.
+    validations:
+      required: true
+  - type: textarea
+    id: done-when
+    attributes:
+      label: Done when
+      description: "A binary gate — objective confirmation that is either true or false when you run it. Not \"improved\", not \"seems to work\"."
+      placeholder: "GET /api/assessments returns 403 for CLIENT_EXEC; test X passes."
+    validations:
+      required: true
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Out of scope
+      description: What this ticket deliberately does NOT touch, so the implementer knows where to stop.
+    validations:
+      required: true
+  - type: textarea
+    id: blocked-by
+    attributes:
+      label: Blocked by
+      description: "Issues that must land first, one per line (e.g. #12), or the word: none."
+    validations:
+      required: true
