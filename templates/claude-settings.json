@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "kolby": {
+      "source": {
+        "source": "github",
+        "repo": "KolbyHalcomb/dev-standards"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "kolby-workflow@kolby": true
+  }
+}

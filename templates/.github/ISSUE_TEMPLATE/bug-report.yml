@@ -1,0 +1,25 @@
+name: Bug report
+description: Something is broken. This lands as needs-triage; triage verifies it and decides where it goes.
+labels: ["needs-triage"]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you did, what you expected, what actually happened.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      description: Steps, starting state, and the account/role if it matters. The closer this is to a runnable recipe, the faster it clears triage.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Error text, logs, screenshots, or the failing request/response.
+    validations:
+      required: false

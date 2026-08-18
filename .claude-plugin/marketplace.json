@@ -6,20 +6,22 @@
   },
   "metadata": {
     "description": "Cross-repo agent and CI conventions.",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   "plugins": [
     {
       "name": "kolby-workflow",
       "source": "./plugins/kolby-workflow",
-      "description": "Documentation and change-management discipline: the change workflow, CHANGELOG format, shared-brain split, planning conventions, and safety-rule authoring.",
-      "version": "0.1.0",
+      "description": "Documentation, change-management, and multiagent workflow discipline for Kolby's repos: the change workflow, CHANGELOG format, shared-brain split, planning conventions, safety-rule authoring, ticket-first, review-before-advance, delegation, and repo setup.",
+      "version": "0.2.0",
       "category": "productivity",
       "keywords": [
         "documentation",
         "changelog",
         "workflow",
-        "planning"
+        "planning",
+        "multiagent",
+        "triage"
       ]
     }
   ]

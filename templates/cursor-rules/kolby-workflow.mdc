@@ -1,0 +1,20 @@
+---
+description: Thin pointer at the kolby-workflow plugin skills. Shared content lives in the plugin (shared-brain); this file stays a wrapper — add repo-specific facts to the repo's brain file, not here.
+alwaysApply: true
+---
+
+# kolby-workflow conventions apply here
+
+This repo follows the [kolby-workflow](https://github.com/KolbyHalcomb/dev-standards) plugin's
+skills, installed via the dev-standards marketplace. The load-bearing ones for everyday work:
+
+- **ticket-first** — no implementation without an agent-ready issue; every PR carries `Closes #N`.
+- **review-before-advance** — read every comment and review before closing, merging, or deploying;
+  implement each item or counter it in writing.
+- **delegation** — planner never implements; one ticket per fresh context; parallelize only
+  independent tickets.
+- **change-workflow / changelog-entry** — confirmed changes get surgical edits plus a dated
+  CHANGELOG entry; commit and push only when asked.
+
+Repo-specific specifics (who reviews, status vocabulary, deploy targets) live in this repo's own
+brain file per the shared-brain skill — read that too.
