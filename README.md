@@ -208,6 +208,7 @@ Files a consumer repo copies in once — the `setup-kolby-repo` skill walks thro
 | [`templates/.github/ISSUE_TEMPLATE/bug-report.yml`](templates/.github/ISSUE_TEMPLATE/bug-report.yml) | Raw intake form. Auto-applies `needs-triage`. |
 | [`templates/.github/pull_request_template.md`](templates/.github/pull_request_template.md) | The closing reference and the review-before-advance checklist. |
 | [`templates/claude-settings.json`](templates/claude-settings.json) | Marketplace pin + plugin enable for `.claude/settings.json`. |
+| [`templates/ruleset-ticket-first.json`](templates/ruleset-ticket-first.json) | Importable branch ruleset: PR required, review threads resolved, `workflow / Ticket-first gate` check (Actions-bound). Import only into repos that call `workflow-ci.yml`. |
 | [`templates/cursor-rules/kolby-workflow.mdc`](templates/cursor-rules/kolby-workflow.mdc) | Thin Cursor rule pointing at the plugin's skills — a `shared-brain` wrapper, not a copy. |
 
 ---

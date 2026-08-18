@@ -112,6 +112,23 @@ and `implement` read.
 
 ## 7. What cannot live in the repo
 
-Branch protection is GitHub settings, not files. Tell the user to require these checks on `main`
-once the first PR has run them: the `workflow-ci` PR gate, plus the repo's own test/lint jobs.
-Without that, every gate above is advisory.
+Branch protection is GitHub settings, not files — but it is a 15-second import, not hand-clicked
+rules. `templates/ruleset-ticket-first.json` is a ready-to-import ruleset that requires a pull
+request (with review threads resolved) and the `workflow / Ticket-first gate` check, bound to the
+GitHub Actions app so another integration cannot spoof the context, on the default branch.
+
+Tell the user to import it once the gate's first PR run exists:
+
+> Repo **Settings → Rules → Rulesets → New ruleset → Import a ruleset** → pick
+> `ruleset-ticket-first.json` (from a dev-standards checkout) → **Create**.
+
+Two cautions to pass on verbatim:
+
+- **Only import into a repo that calls `workflow-ci.yml`** (step 3). A required check that never
+  reports leaves every PR stuck on "expected" — the gate must exist before it is required.
+- The check context is `workflow / Ticket-first gate` — the caller job id `workflow` from step 3's
+  snippet is part of that name. A repo that renames the job must edit the ruleset to match.
+
+Rulesets aggregate, so importing this alongside a repo's existing rules only adds requirements.
+The repo's own test/lint checks are worth requiring too; that stays a per-repo judgment call.
+Without any of it, every gate above is advisory.
